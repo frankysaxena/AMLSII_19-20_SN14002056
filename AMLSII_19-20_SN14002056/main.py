@@ -1,4 +1,4 @@
-from Datasets.data_loader import LoaderObject
+from Datasets.data_loader import DataPreprocessor
 
 
 # # ======================================================================================================================
@@ -15,8 +15,8 @@ taskB = 'taskB'
 # ======================================================================================================================
 # Data preprocessing
 
-taskA = LoaderObject(path_to_dir, taskA)
-taskB = LoaderObject(path_to_dir, taskB)
+taskA = DataPreprocessor(path_to_dir, taskA)
+taskB = DataPreprocessor(path_to_dir, taskB)
 
 A_data = taskA.get_raw_dataframe(path_to_dir, taskA)
 B_data = taskB.get_raw_dataframe(path_to_dir, taskB)

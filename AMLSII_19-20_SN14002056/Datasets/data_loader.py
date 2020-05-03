@@ -1,6 +1,6 @@
 import pandas as pd 
 
-class LoaderObject:
+class DataPreprocessor:
 
     def __init__(self, path, txtfile):
 
