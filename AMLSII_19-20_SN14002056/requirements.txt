@@ -1,3 +1,8 @@
 vaderSentiment
 pandas
 nltk
+tensorflow
+keras
+numpy
+matplotlib
+scikit-learn

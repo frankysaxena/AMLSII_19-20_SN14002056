@@ -21,7 +21,7 @@ taskB = DataPreprocessor(path_to_dir, taskB)
 A_data = taskA.get_raw_dataframe(path_to_dir, taskA)
 B_data = taskB.get_raw_dataframe(path_to_dir, taskB)
 
-print(B_data)
+print(A_data)
 
 
 # data_train, data_val, data_test = data_preprocessing(args...)
