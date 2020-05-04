@@ -30,14 +30,14 @@ Total execution time should be about 10-15 minutes.
 
 Please ensure you have these dependencies:
 
-vaderSentiment
-pandas
-nltk
-tensorflow
-keras
-numpy
-matplotlib
-scikit-learn
+``vaderSentiment``
+``pandas``
+``nltk``
+``tensorflow``
+``keras``
+``numpy``
+``matplotlib``
+``scikit-learn``
 
 These have all been listed in the `requirements.txt` file
 
