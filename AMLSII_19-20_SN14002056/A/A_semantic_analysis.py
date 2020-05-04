@@ -10,13 +10,13 @@ from statistics import mode
 from nltk.tokenize import word_tokenize
 import re
 from nltk.corpus import stopwords
+import time
 
 class SemanticAnalysis:
 
     def __init__(self, features, labels):
         self.features = features
         self.labels = labels
-
 
     def featureCreator(self, features, labels):
         all_words = []
@@ -38,93 +38,116 @@ class SemanticAnalysis:
             stopped = [w for w in tokenized if not w in stop_words]
             pos = nltk.pos_tag(stopped)
             
-        #     make a list of  all adjectives identified by the allowed word types list above
+        #make a list of  all adjectives identified by the allowed word types list above
             for w in pos:
                 if w[1][0] in only_words_allowed:
                     all_words.append(w[0].lower())
         
-        return all_words
+        return all_words, documents
 
-def find_features(document):
-    words = word_tokenize(str(document))
-    features = {}
-    for w in word_features:
-        features[w] = (w in words)
+    def get_word_features(self, allwordslist):
+        BOW = nltk.FreqDist(allwordslist)
+        word_features = list(BOW.keys())[:5000]
+        word_features[0], word_features[-1]
 
-    return features
+        save_word_features = open("./Datasets/saved/word_features.pickle","wb")
+        pickle.dump(word_features, save_word_features)
 
-# Features mapped to each tweet
-featuresets = [(find_features(rev), category) for (rev, category) in documents]
+        return word_features
 
-# Shuffling the documents 
-random.shuffle(featuresets)
-train_set = 0.8 * len(featuresets)
-training_set = featuresets[:int(train_set)]
+    def find_features(self, document, word_features):
+        words = word_tokenize(str(document))
+        features = {}
+        for w in word_features:
+            features[w] = (w in words)
 
-testing_set = featuresets[int(train_set):]
-print( 'training_set :', len(training_set), '\ntesting_set :', len(testing_set))
+        return features
 
-start = time.time()
+    def train_val_generator(self, docs, wordfeats):
 
-classifier = nltk.NaiveBayesClassifier.train(training_set)
+        # Features mapped to each tweet
+        featuresets = [(self.find_features(rev, wordfeats), category) for (rev, category) in docs]
 
-print("Classifier accuracy percent:",(nltk.classify.accuracy(classifier, testing_set))*100)
+        # Shuffling the documents 
+        random.shuffle(featuresets)
+        train_set = 0.8 * len(featuresets)
+        training_set = featuresets[:int(train_set)]
+        validation_set = featuresets[int(train_set):]
 
-classifier.show_most_informative_features(15)
-end = time.time() - start
-print(str(end) + ' seconds')
+        return training_set, validation_set
+    """
+    The following below are all the classes that are implemented as part of the machine learning models
 
-start = time.time()
+    NBC : Naive Bayes 
+    MNB : Multinomial Naive Bayes
+    BNB : Bernoulli Naive Bayes *** Highest performing one out of all tests
+    Log : Logistic regression classifier
+    SGD : Stochastic Gradient classifier
 
+    """
 
-MNB_clf = SklearnClassifier(MultinomialNB())
-MNB_clf.train(training_set)
-print("MNB_classifier accuracy percent:", (nltk.classify.accuracy(MNB_clf, testing_set))*100)
+    """
 
-end = time.time() - start
-print(str(end) + ' seconds')
+    Each function implementation of the following models also saves the best performing model to the Datasets/saved_models directory. 
+    Time is also recorded per computation for better visibility around the balance between accuracy + computation
 
+    """
+    def NBClf(self, training_set, validation_set):
+        start = time.time()
+        classifier = nltk.NaiveBayesClassifier.train(training_set)
+        print("Classifier accuracy percent:",(nltk.classify.accuracy(classifier, validation_set))*100)
+        classifier.show_most_informative_features(15)
+        end = time.time() - start
+        print('Naive Bayes took: ' + str(end) + ' seconds')
+        self.create_pickle(classifier, '../Datasets/saved_models/ONB_clf.pickle' )
+        acc_score = nltk.classify.accuracy(classifier, validation_set)*100
+        return acc_score
 
-start = time.time()
+    def MNBClf(self, training_set, validation_set):
+        start = time.time()
+        MNB_clf = SklearnClassifier(MultinomialNB())
+        MNB_clf.train(training_set)
+        print("MNB_classifier accuracy percent:", (nltk.classify.accuracy(MNB_clf, validation_set))*100)
+        self.create_pickle(MNB_clf, '../Datasets/saved_models/MNB_clf.pickle' )
+        end = time.time() - start
+        print('Multinomial Naive Bayes took: ' + str(end) + ' seconds')
+        acc_score = nltk.classify.accuracy(MNB_clf, validation_set)*100
+        return acc_score
 
-BNB_clf = SklearnClassifier(BernoulliNB())
-BNB_clf.train(training_set)
-print("BernoulliNB_classifier accuracy percent:", (nltk.classify.accuracy(BNB_clf, testing_set))*100)
+    def BNBClf(self, training_set, validation_set):
+        start = time.time()
+        BNB_clf = SklearnClassifier(BernoulliNB())
+        BNB_clf.train(training_set)
+        print("BernoulliNB_classifier accuracy percent:", (nltk.classify.accuracy(BNB_clf, validation_set))*100)
+        end = time.time() - start
+        print(str(end) + ' seconds')
+        self.create_pickle(BNB_clf, '../Datasets/saved_models/BNB_clf.pickle' )
+        acc_score = nltk.classify.accuracy(BNB_clf, validation_set)*100
+        return acc_score
 
-end = time.time() - start
-print(str(end) + ' seconds')
+    def LogClf(self, training_set, validation_set):
+        start = time.time()
+        LogReg_clf = SklearnClassifier(LogisticRegression())
+        LogReg_clf.train(training_set)
+        print("LogisticRegression_classifier accuracy percent:", (nltk.classify.accuracy(LogReg_clf, validation_set))*100)
+        end = time.time() - start
+        print(str(end) + ' seconds')
+        self.create_pickle(LogReg_clf, '../Datasets/saved_models/LogReg_clf.pickle' )
+        acc_score = nltk.classify.accuracy(LogReg_clf, validation_set)*100
+        return acc_score
 
+    def SGDClf(self, training_set, validation_set):
+        start = time.time()
+        SGD_clf = SklearnClassifier(SGDClassifier())
+        SGD_clf.train(training_set)
+        print("SGDClassifier_classifier accuracy percent:", (nltk.classify.accuracy(SGD_clf, validation_set))*100)
+        end = time.time() - start
+        print(str(end) + ' seconds')
+        self.create_pickle(SGD_clf, '../Datasets/saved_models/SGD_clf.pickle' )
+        acc_score = nltk.classify.accuracy(SGD_clf, validation_set)*100
+        return acc_score
 
-start = time.time()
-
-LogReg_clf = SklearnClassifier(LogisticRegression())
-LogReg_clf.train(training_set)
-print("LogisticRegression_classifier accuracy percent:", (nltk.classify.accuracy(LogReg_clf, testing_set))*100)
-
-end = time.time() - start
-print(str(end) + ' seconds')
-
-
-start = time.time()
-
-SGD_clf = SklearnClassifier(SGDClassifier())
-SGD_clf.train(training_set)
-print("SGDClassifier_classifier accuracy percent:", (nltk.classify.accuracy(SGD_clf, testing_set))*100)
-
-end = time.time() - start
-print(str(end) + ' seconds')
-
-
-def create_pickle(c, file_name): 
-    save_classifier = open('Datasets/'+file_name, 'wb')
-    pickle.dump(c, save_classifier)
-    save_classifier.close()
-
-classifiers_dict = {'ONB': [classifier, 'saved_models/ONB_clf.pickle'],
-                    'MNB': [MNB_clf, 'saved_models/MNB_clf.pickle'],
-                    'BNB': [BNB_clf, 'saved_models/BNB_clf.pickle'],
-                    'LogReg': [LogReg_clf, 'saved_models/LogReg_clf.pickle'],
-                    'SGD': [SGD_clf, 'saved_models/SGD_clf.pickle']}
-
-for clf, listy in classifiers_dict.items(): 
-    create_pickle(listy[0], listy[1])
+    def create_pickle(self, c, file_name): 
+        save_classifier = open('Datasets/'+file_name, 'wb')
+        pickle.dump(c, save_classifier)
+        save_classifier.close()
