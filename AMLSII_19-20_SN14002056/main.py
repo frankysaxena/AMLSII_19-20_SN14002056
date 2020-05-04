@@ -18,11 +18,15 @@ taskB = 'taskB'
 taskA = DataPreprocessor(path_to_dir, taskA)
 taskB = DataPreprocessor(path_to_dir, taskB)
 
-A_data = taskA.get_raw_dataframe(path_to_dir, taskA)
-B_data = taskB.get_raw_dataframe(path_to_dir, taskB)
+A_df = taskA.get_raw_dataframe(path_to_dir, taskA)
+B_df = taskB.get_raw_dataframe(path_to_dir, taskB)
 
-print(A_data)
+A_train, A_test = taskA.split_train_test(A_df)
+A_train_features, A_train_labels = taskA.convert_to_arrays(A_train)
+A_test_features, A_test_labels = taskA.convert_to_arrays(A_test)
 
+
+print(A_test_features)
 
 # data_train, data_val, data_test = data_preprocessing(args...)
 # # ======================================================================================================================

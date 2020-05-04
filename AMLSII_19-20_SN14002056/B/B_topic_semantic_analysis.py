@@ -9,13 +9,12 @@ from nltk.classify import ClassifierI
 from statistics import mode
 from nltk.tokenize import word_tokenize
 import re
+from nltk.corpus import stopwords
 
-
+class
 all_words = []
 documents = []
 
-from nltk.corpus import stopwords
-import re
 
 stop_words = list(set(stopwords.words('english')))
 
