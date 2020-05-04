@@ -22,7 +22,7 @@ You can run the Jupyter notebooks as is to display results. These notebooks were
 Main program execution file:
 * main.py
     
-Total execution time should be about 10-15 minutes.
+Total execution time should be about 5 minutes.
 
 ## Usage
 

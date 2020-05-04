@@ -1,6 +1,0 @@
-# README
-
-dependencies
-
-requirements.txt
-
